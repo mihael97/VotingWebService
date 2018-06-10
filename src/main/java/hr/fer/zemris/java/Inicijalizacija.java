@@ -3,14 +3,14 @@ package hr.fer.zemris.java;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletContextEvent;
@@ -19,6 +19,11 @@ import javax.servlet.annotation.WebListener;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
+
+import hr.fer.zemris.java.dao.DAOProvider;
+import hr.fer.zemris.java.dao.sql.SQLDAO;
+import hr.fer.zemris.java.dao.sql.SQLData;
+import hr.fer.zemris.java.strcutures.PollsStructure;
 
 /**
  * Class represents starting point to server and implements
@@ -34,6 +39,7 @@ import com.mchange.v2.c3p0.DataSources;
  */
 @WebListener
 public class Inicijalizacija implements ServletContextListener {
+	private boolean created;
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
@@ -44,12 +50,7 @@ public class Inicijalizacija implements ServletContextListener {
 			properties.load(Files
 					.newInputStream(Paths.get(sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties"))));
 
-			if (!(properties.contains("host") && properties.contains("port") && properties.contains("name")
-					&& properties.contains("user") && properties.contains("password"))) {
-				throw new IOException("Properties file doesn't contain all requested items!");
-			}
-
-			connectionURL = "jdbc:derby://+" + properties.getProperty("host") + ":+" + properties.getProperty("port")
+			connectionURL = "jdbc:derby://" + properties.getProperty("host") + ":" + properties.getProperty("port")
 					+ "/" + properties.getProperty("name") + ";user=" + properties.getProperty("user") + ";password="
 					+ properties.getProperty("password");
 		} catch (IOException e) {
@@ -67,8 +68,20 @@ public class Inicijalizacija implements ServletContextListener {
 		sce.getServletContext().setAttribute("hr.fer.zemris.dbpool", cpds);
 
 		try {
-			createTables(cpds.getConnection());
-		} catch (SQLException e) {
+			Class.forName("org.apache.derby.jdbc.ClientDriver");
+			Connection connection = cpds.getConnection();
+			createTables(connection);
+
+			PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM Polls");
+			ResultSet set = statement.executeQuery();
+			set.next();
+
+			if (set.getInt(1) == 0 || created) {
+				fillTables(connection);
+			}
+
+			connection.close();
+		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		cpds.close();
@@ -78,60 +91,65 @@ public class Inicijalizacija implements ServletContextListener {
 
 		try {
 
-			createTable(connection, "CREATE TABLE PollOptions" + "(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
-					+ "optionTitle VARCHAR(100) NOT NULL," + "optionLink VARCHAR(150) NOT NULL," + "pollID BIGINT,"
-					+ "votesCount BIGINT," + "FOREIGN KEY (pollID) REFERENCES Polls(id)" + ");");
+			createTable(connection,
+					"CREATE TABLE PollOptions(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
+							+ "optionTitle VARCHAR(100) NOT NULL,optionLink VARCHAR(150) NOT NULL,pollID BIGINT,"
+							+ "votesCount BIGINT," + "FOREIGN KEY (pollID) REFERENCES Polls(id)" + ")");
 
 			createTable(connection, "CREATE TABLE Polls" + "(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
-					+ "title VARCHAR(150) NOT NULL," + "message CLOB(2048) NOT NULL);");
+					+ "title VARCHAR(150) NOT NULL,message CLOB(2048) NOT NULL)");
 
-			PreparedStatement statement = connection.prepareStatement("SELECT * FROM pools");
-			ResultSet set = statement.executeQuery();
-
-			if (!set.next()) {
-				fillTables(connection);
-			}
+			created = true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			if (!e.getSQLState().equals("X0Y32")) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	private void createTable(Connection connection, String string) {
-		try {
-			connection.prepareStatement(string).execute();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	private void createTable(Connection connection, String string) throws SQLException {
+		connection.prepareStatement(string).execute();
 	}
 
 	private void fillTables(Connection connection) {
-
 		try {
-			PreparedStatement statement = connection
-					.prepareStatement("INSERT INTO Pool(id,title,message) VALUES({1,\"Voting for favourite band:\","
-							+ "\"From given bands,which one is your favoutite. Please click on link for voting\"},"
-							+ "{2,\"Voting for best car manufacturer:\",\"From given manufactures,which one is your "
-							+ "favourite?\"});");
-			statement.executeUpdate();
+			String polls = "INSERT INTO Polls(title,message) VALUES(";
+			String pollsOptions = "INSERT INTO PollOptions(optionTitle,optionLink,pollID,votesCount) VALUES(";
 
-			statement = connection
-					.prepareStatement("INSERT INTO PollOptions(id,optionTitle,optionLink,pollID,votesCount) VALUES("
-							+ "{1,\"The Beatles\",\"https://www.youtube.com/watch?v=z9ypq6_5bsg\",1,0},"
-							+ "{2,\"The Pletters\",\"https://www.youtube.com/watch?v=H2di83WAOhU\",1,0},"
-							+ "{3,\"The Beach Boys\",\"https://www.youtube.com/watch?v=2s4slliAtQU\",1,0}"
-							+ "{4,\"The Four Seasons\",\"https://www.youtube.com/watch?v=y8yvnqHmFds\",1,0}"
-							+ "{5,\"The Marcles\",\"https://www.youtube.com/watch?v=qoi3TH59ZEs\",1,0}"
-							+ "{6,\"The Everly Brothers\",\"https://www.youtube.com/watch?v=tbU3zdAgiX8\",1,0}"
-							+ "{7,\"The Mamas And The Papas\",\"https://www.youtube.com/watch?v=N-aK6JnyFmk\",1,0}"
-							+ "{1,\"Subaru\",\"https://www.youtube.com/watch?v=6yWFacB_ayo\",2,0}"
-							+ "{2,\"Fiat\",\"https://www.youtube.com/watch?v=WmpTqJ5i07U\",2,0}"
-							+ "{3,\"VW\",\"https://www.youtube.com/watch?v=-UQ4SyKuVR4\",2,0});");
-			statement.execute();
+			for (String string : SQLData.POLLS) {
+				PreparedStatement statement = connection.prepareStatement(polls + string + ");");
+				statement.executeUpdate();
+				statement.close();
+			}
 
-			statement.close();
+			List<PollsStructure> list = DAOProvider.getDao().getPolls();
+
+			fillItems(connection, SQLData.POLLSOPTIONS_BANDS, getID(list, "Voting for favourite band:"), pollsOptions);
+			fillItems(connection, SQLData.POLLSOPTIONS_BANDS, getID(list, "Voting for best car manufacturer:"),
+					pollsOptions);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void fillItems(Connection connection, List<String> list, int id, String options) throws SQLException {
+		for (String string : list) {
+			PreparedStatement statement = connection.prepareStatement(options + string + ");");
+			statement.setInt(1, id);
+			statement.execute();
+			statement.close();
+		}
+
+	}
+
+	private int getID(List<PollsStructure> list, String string) {
+		for (PollsStructure struc : list) {
+			if (struc.getTitle().contains(string)) {
+				return struc.getId();
+			}
+		}
+
+		throw new IllegalArgumentException("Poll with title \'" + string + "\' doesn't exist!");
 	}
 
 	@Override

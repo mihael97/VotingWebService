@@ -2,6 +2,7 @@ package hr.fer.zemris.java.servlets;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import hr.fer.zemris.java.strcutures.PollsStructure;
  * @author Mihael
  *
  */
+@WebServlet("/servleti/index.html")
 public class ServletLoading extends HttpServlet {
 	/**
 	 * serialVersionUID
@@ -47,5 +49,6 @@ public class ServletLoading extends HttpServlet {
 		htmlBuilder.append("</ol></body>\n</html>\n");
 
 		resp.getWriter().write(htmlBuilder.toString());
+		resp.getOutputStream().flush();
 	}
 }
