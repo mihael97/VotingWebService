@@ -15,22 +15,28 @@ import javax.sql.DataSource;
 
 import hr.fer.zemris.java.dao.sql.SQLConnectionProvider;
 
-@WebFilter(filterName="f1",urlPatterns={"/servleti/*"})
+@WebFilter(filterName = "f1", urlPatterns = { "/servleti/*" })
 public class ConnectionSetterFilter implements Filter {
-	
+
+	/**
+	 * Not implemented
+	 */
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
-	
+
+	/**
+	 * Not implemented
+	 */
 	@Override
 	public void destroy() {
 	}
-	
+
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
-		
-		DataSource ds = (DataSource)request.getServletContext().getAttribute("hr.fer.zemris.dbpool");
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+
+		DataSource ds = (DataSource) request.getServletContext().getAttribute("hr.fer.zemris.dbpool");
 		Connection con = null;
 		try {
 			con = ds.getConnection();
@@ -42,8 +48,11 @@ public class ConnectionSetterFilter implements Filter {
 			chain.doFilter(request, response);
 		} finally {
 			SQLConnectionProvider.setConnection(null);
-			try { con.close(); } catch(SQLException ignorable) {}
+			try {
+				con.close();
+			} catch (SQLException ignorable) {
+			}
 		}
 	}
-	
+
 }

@@ -29,7 +29,7 @@ public class SQLDAO implements DAO {
 
 		List<PollsStructure> forReturn = new ArrayList<>();
 		try {
-			PreparedStatement statement = connection.prepareStatement("SELECT * FROM Polls;");
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM Polls");
 			ResultSet set = statement.executeQuery();
 
 			while (set.next()) {
@@ -61,7 +61,7 @@ public class SQLDAO implements DAO {
 		Connection connection = SQLConnectionProvider.getConnection();
 		try {
 			PreparedStatement statement = connection
-					.prepareStatement("SELECT id,optionTitle,optionLink FROM PollOption WHERE pollID=" + module + ";");
+					.prepareStatement("SELECT * FROM PollOptions WHERE pollID=" + module);
 
 			ResultSet set = statement.executeQuery();
 

@@ -39,7 +39,7 @@ public class GlasanjeServlet extends HttpServlet {
 		resp.setStatus(HttpServletResponse.SC_ACCEPTED);
 		resp.setContentType("html/text; charset=utf-8");
 
-		int id = (int) req.getServletContext().getAttribute("pollID");
+		int id = Integer.parseInt(req.getParameter("pollID"));
 
 		StringBuilder html = new StringBuilder();
 		html.append("<!DOCTYPE><html><body><h2>Please vote for one of given items by clicking on name</h2>\n");
@@ -53,7 +53,8 @@ public class GlasanjeServlet extends HttpServlet {
 
 		for (PollOptionsStructure struc : DAOProvider.getDao().loadItems(id)) {
 			html.append("<li>").append("<a href=")
-					.append(req.getServletPath() + "/servleti/glasanje-glasaj?id=" + struc.getId());
+					.append(req.getServletPath() + "/servleti/glasanje-glasaj?id=" + struc.getId() + ">");
+			html.append(struc.getOptionTitle());
 			html.append("</a></li>");
 		}
 

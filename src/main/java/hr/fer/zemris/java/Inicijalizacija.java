@@ -70,13 +70,14 @@ public class Inicijalizacija implements ServletContextListener {
 		cpds.setJdbcUrl(connectionURL);
 
 		sce.getServletContext().setAttribute("hr.fer.zemris.dbpool", cpds);
-
+		Connection connection = null;
 		try {
 			Class.forName("org.apache.derby.jdbc.ClientDriver");
-			Connection connection = cpds.getConnection();
+			connection = cpds.getConnection();
 			createTables(connection);
 
 			PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM Polls");
+
 			ResultSet set = statement.executeQuery();
 			set.next();
 
@@ -84,24 +85,42 @@ public class Inicijalizacija implements ServletContextListener {
 				fillTables(connection);
 			}
 
-			connection.close();
+			created = false;
+
+			statement.close();
 		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
-		cpds.close();
 	}
 
 	private void createTables(Connection connection) {
 
 		try {
+			PreparedStatement statement = connection
+					.prepareStatement("CREATE TABLE Polls (id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
+							+ " title VARCHAR(150) NOT NULL, message CLOB(2048) NOT NULL)");
+			statement.execute();
 
-			createTable(connection,
-					"CREATE TABLE PollOptions(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
+			try {
+				statement.close();
+			} catch (Exception e) {
+			}
+
+			statement = connection
+					.prepareStatement("CREATE TABLE PollOptions(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
 							+ "optionTitle VARCHAR(100) NOT NULL,optionLink VARCHAR(150) NOT NULL,pollID BIGINT,"
-							+ "votesCount BIGINT," + "FOREIGN KEY (pollID) REFERENCES Polls(id)" + ")");
-
-			createTable(connection, "CREATE TABLE Polls" + "(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
-					+ "title VARCHAR(150) NOT NULL,message CLOB(2048) NOT NULL)");
+							+ "votesCount BIGINT,FOREIGN KEY (pollID) REFERENCES Polls(id));");
+			statement.execute();
+			try {
+				statement.close();
+			} catch (Exception e) {
+			}
 
 			created = true;
 		} catch (SQLException e) {
@@ -109,10 +128,6 @@ public class Inicijalizacija implements ServletContextListener {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private void createTable(Connection connection, String string) throws SQLException {
-		connection.prepareStatement(string).execute();
 	}
 
 	private void fillTables(Connection connection) {
@@ -129,7 +144,7 @@ public class Inicijalizacija implements ServletContextListener {
 			List<PollsStructure> list = DAOProvider.getDao().getPolls();
 
 			fillItems(connection, SQLData.POLLSOPTIONS_BANDS, getID(list, "Voting for favourite band:"), pollsOptions);
-			fillItems(connection, SQLData.POLLSOPTIONS_BANDS, getID(list, "Voting for best car manufacturer:"),
+			fillItems(connection, SQLData.POLLSOPTIONS_CARS, getID(list, "Voting for best car manufacturer:"),
 					pollsOptions);
 		} catch (SQLException e) {
 			e.printStackTrace();
