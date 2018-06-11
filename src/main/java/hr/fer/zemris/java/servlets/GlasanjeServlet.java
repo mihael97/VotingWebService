@@ -14,7 +14,7 @@ import hr.fer.zemris.java.strcutures.PollOptionsStructure;
 import hr.fer.zemris.java.strcutures.PollsStructure;
 
 /**
- * Method represents data loader and creator of voting form
+ * Class represents data loader and creator of voting form
  * 
  * @author MIhael
  *
@@ -36,32 +36,30 @@ public class GlasanjeServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.setStatus(HttpServletResponse.SC_ACCEPTED);
-		resp.setContentType("html/text; charset=utf-8");
+		resp.setStatus(HttpServletResponse.SC_OK);
+		resp.setContentType("text/html; charset=utf-8");
 
 		int id = Integer.parseInt(req.getParameter("pollID"));
 
 		StringBuilder html = new StringBuilder();
-		html.append("<!DOCTYPE><html><body><h2>Please vote for one of given items by clicking on name</h2>\n");
+		html.append("<html>\n<body>\n<h2>Please vote for one of given items by clicking on name</h2>\n");
 
 		PollsStructure poll = DAOProvider.getDao().getPolls().stream().filter(e -> e.getId() == id)
 				.collect(Collectors.toList()).get(0);
-		html.append("<h3>").append(poll.getTitle()).append("</h3>");
-		html.append("<h4>").append(poll.getMessage()).append("</h4>");
+		html.append("<h3>").append(poll.getTitle()).append("</h3>\n");
+		html.append("<h4>").append(poll.getMessage()).append("</h4>\n");
 
-		html.append("<ol>");
+		html.append("<ol>\n");
 
 		for (PollOptionsStructure struc : DAOProvider.getDao().loadItems(id)) {
 			html.append("<li>").append("<a href=")
-					.append(req.getServletPath() + "/servleti/glasanje-glasaj?id=" + struc.getId() + ">");
+					.append(req.getContextPath() + "/servleti/glasanje-glasaj?id=" + struc.getId() + ">");
 			html.append(struc.getOptionTitle());
-			html.append("</a></li>");
+			html.append("</a></li>\n");
 		}
 
-		html.append("</ol>");
-		html.append("</body></html>");
+		html.append("</ol>\n</body>\n</html>\n");
 
-		resp.getOutputStream().write(html.toString().getBytes());
-		resp.getOutputStream().flush();
+		resp.getWriter().write(html.toString());
 	}
 }

@@ -36,9 +36,9 @@ public class GlasanjeGlasajServlet extends HttpServlet {
 		resp.setContentType("text/html; charset=utf-8");
 		resp.setStatus(HttpServletResponse.SC_OK);
 
-		Integer idVote = Integer.parseInt((String) req.getParameter("id"));
-
-		DAOProvider.getDao().incrementVote((int) req.getServletContext().getAttribute("pollID"), idVote);
+		Integer idVote = Integer.parseInt(req.getParameter("id"));
+		DAOProvider.getDao().incrementVote(idVote);
+		req.getServletContext().setAttribute("pollID", DAOProvider.getDao().getPollID(idVote));
 
 		resp.sendRedirect(req.getContextPath() + "/servleti/glasanje-rezultati");
 	}

@@ -42,26 +42,26 @@ table.rez td {
 		<tbody>
 			<c:forEach var="structure" items="${allItems}">
 				<tr>
-					<td>${structure.getName()}</td>
-					<td>${structure.getVote()}</td>
+					<td>${structure.getOptionTitle()}</td>
+					<td>${structure.getVotes()}</td>
 				</tr>
 			</c:forEach>
 		</tbody>
 	</table>
 	<h2>Graphical show</h2>
 	<img alt="Pie-chart"
-		src="<%=request.getContextPath()%>/glasanje-grafika" width="400"
-		height="400" />
+		src="<%=request.getContextPath()%>/servleti/glasanje-grafika"
+		width="400" height="400" />
 	<h2>Result in XLS format</h2>
 	<p>
 		Results in XLS format are available <a
-			href="<%=request.getContextPath()%>/glasanje-xls">here</a>
+			href="<%=request.getContextPath()%>/servleti/glasanje-xls">here</a>
 	</p>
 	<h2>Other</h2>
-	<p>Some songs from winner/winners</p>
+	<p>Some links from winner/winners</p>
 	<ul>
 		<c:forEach var="structure" items="${best}">
-			<li><a href="${structure.getLink()}" target="_blank">${structure.getName()}</a></li>
+			<li><a href="${structure.getOptionLink()}" target="_blank">${structure.getOptionTitle()}</a></li>
 		</c:forEach>
 	</ul>
 </body>

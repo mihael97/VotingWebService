@@ -14,7 +14,10 @@ import hr.fer.zemris.java.dao.sql.SQLDAO;
  */
 public class DAOProvider {
 
-	private static DAO dao= new SQLDAO();
+	/**
+	 * SQL dao
+	 */
+	private static DAO dao = new SQLDAO();
 
 	static {
 		// procitaj d=db.properties;

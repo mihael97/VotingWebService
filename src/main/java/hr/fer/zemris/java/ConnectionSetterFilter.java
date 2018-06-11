@@ -15,6 +15,12 @@ import javax.sql.DataSource;
 
 import hr.fer.zemris.java.dao.sql.SQLConnectionProvider;
 
+/**
+ * Class implements Filter which is started after server starting
+ * 
+ * @author Mihael
+ *
+ */
 @WebFilter(filterName = "f1", urlPatterns = { "/servleti/*" })
 public class ConnectionSetterFilter implements Filter {
 
@@ -32,6 +38,19 @@ public class ConnectionSetterFilter implements Filter {
 	public void destroy() {
 	}
 
+	/**
+	 * Method connects {@link SQLConnectionProvider} with active connection
+	 * 
+	 * @param request
+	 *            - servlet request
+	 * @param response
+	 *            - servlet response
+	 * @param chain
+	 *            - filter chain
+	 * 
+	 * @throws IOException
+	 *             | {@link SQLException} - if exception during setting appears
+	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {

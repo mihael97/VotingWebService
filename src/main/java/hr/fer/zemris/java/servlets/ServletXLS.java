@@ -62,9 +62,15 @@ public class ServletXLS extends HttpServlet {
 	private HSSFWorkbook generateDocument(List<PollOptionsStructure> list) {
 		HSSFWorkbook file = new HSSFWorkbook();
 		HSSFSheet sheet = file.createSheet("Voting results");
-		int i = 0;
+		int i = 1;
+
+		HSSFRow row = sheet.createRow(0);
+
+		row.createCell(0).setCellValue("Item:");
+		row.createCell(1).setCellValue("Votes:");
+
 		for (PollOptionsStructure structure : list) {
-			HSSFRow row = sheet.createRow(i);
+			row = sheet.createRow(i);
 			row.createCell(0).setCellValue(structure.getOptionTitle());
 			row.createCell(1).setCellValue(structure.getVotes());
 			i++;

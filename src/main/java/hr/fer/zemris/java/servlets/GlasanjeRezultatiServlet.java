@@ -65,6 +65,10 @@ public class GlasanjeRezultatiServlet extends HttpServlet {
 			}
 		});
 
+		for (int i = 0; i < list.size(); i++) {
+			System.out.println(list.get(i).getOptionLink());
+		}
+
 		final int max2 = list.get(0).getVotes();
 		req.getSession().setAttribute("best",
 				list.stream().filter(e -> e.getVotes() == max2).collect(Collectors.toList()));

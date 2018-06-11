@@ -3,12 +3,12 @@ package hr.fer.zemris.java;
 import java.beans.PropertyVetoException;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,9 +19,7 @@ import javax.servlet.annotation.WebListener;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 
-import hr.fer.zemris.java.dao.DAOProvider;
 import hr.fer.zemris.java.dao.sql.SQLData;
-import hr.fer.zemris.java.strcutures.PollsStructure;
 
 /**
  * Class represents starting point to server and implements
@@ -37,8 +35,20 @@ import hr.fer.zemris.java.strcutures.PollsStructure;
  */
 @WebListener
 public class Inicijalizacija implements ServletContextListener {
+	/**
+	 * Variable shows if tables are created because they didn't exist
+	 */
 	private boolean created;
 
+	/**
+	 * Method prepares connection functionality<br>
+	 * Firstly loads properties file from disc,method initializes
+	 * {@link ComboPooledDataSource} with loaded data. Secondly calls methods for
+	 * checking if tables exist
+	 * 
+	 * @param sce
+	 *            - {@link ServletContextEvent} servlet event
+	 */
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 
@@ -47,12 +57,6 @@ public class Inicijalizacija implements ServletContextListener {
 		try {
 			properties.load(new FileInputStream(
 					Paths.get(sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties")).toFile()));
-
-			System.out.println(properties.getProperty("host"));
-			System.out.println(properties.getProperty("port"));
-			System.out.println(properties.getProperty("name"));
-			System.out.println(properties.getProperty("user"));
-			System.out.println(properties.getProperty("password"));
 
 			connectionURL = "jdbc:derby://" + properties.getProperty("host") + ":" + properties.getProperty("port")
 					+ "/" + properties.getProperty("name") + ";user=" + properties.getProperty("user") + ";password="
@@ -99,6 +103,15 @@ public class Inicijalizacija implements ServletContextListener {
 		}
 	}
 
+	/**
+	 * Method creates two tables,one for polls second for poll's data,if they don't
+	 * exist
+	 * 
+	 * @param connection
+	 *            - connection
+	 * @throws SQLException
+	 *             - if exception during table making appears
+	 */
 	private void createTables(Connection connection) {
 
 		try {
@@ -115,7 +128,7 @@ public class Inicijalizacija implements ServletContextListener {
 			statement = connection
 					.prepareStatement("CREATE TABLE PollOptions(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
 							+ "optionTitle VARCHAR(100) NOT NULL,optionLink VARCHAR(150) NOT NULL,pollID BIGINT,"
-							+ "votesCount BIGINT,FOREIGN KEY (pollID) REFERENCES Polls(id));");
+							+ "votesCount BIGINT,FOREIGN KEY (pollID) REFERENCES Polls(id))");
 			statement.execute();
 			try {
 				statement.close();
@@ -130,47 +143,63 @@ public class Inicijalizacija implements ServletContextListener {
 		}
 	}
 
-	private void fillTables(Connection connection) {
-		try {
-			String polls = "INSERT INTO Polls(title,message) VALUES(";
-			String pollsOptions = "INSERT INTO PollOptions(optionTitle,optionLink,pollID,votesCount) VALUES(";
+	/**
+	 * Method fills every table(one with polls,other with pool's items) with data
+	 * 
+	 * @param connection
+	 *            - connection
+	 * @throws SQLException
+	 *             - if exception during insertion appears
+	 */
+	private void fillTables(Connection connection) throws SQLException {
 
-			for (String string : SQLData.POLLS) {
-				PreparedStatement statement = connection.prepareStatement(polls + string + ");");
-				statement.executeUpdate();
+		fillTable(connection, SQLData.POLLSOPTIONS_BANDS);
+		fillTable(connection, SQLData.POLLSOPTIONS_CARS);
+	}
+
+	/**
+	 * Method fills created tables with data
+	 * 
+	 * @param connection
+	 *            - connection
+	 * @param options
+	 *            - data we want to insert
+	 * @throws SQLException
+	 *             - if exception during insertion appears
+	 */
+	private void fillTable(Connection connection, List<String> options) throws SQLException {
+		String polls = "INSERT INTO Polls(title,message) VALUES(";
+		String pollsOptions = "INSERT INTO PollOptions(optionTitle,optionLink,pollID,votesCount) VALUES(";
+
+		for (int i = 0, id = -1; i < options.size(); i++) {
+			if (i == 0) {
+				Statement statement = connection.createStatement();
+				statement.executeUpdate(polls + options.get(i) + ")", Statement.RETURN_GENERATED_KEYS);
+				ResultSet set = statement.getGeneratedKeys();
+				set.next();
+				id = set.getInt(1);
+				statement.close();
+			} else {
+				if (id < 0) {
+					throw new IllegalArgumentException("Id is " + id + " but must be greather or equal to zero!");
+				}
+
+				PreparedStatement statement = connection.prepareStatement(pollsOptions + options.get(i) + ")");
+				statement.setInt(1, id);
+				statement.execute();
 				statement.close();
 			}
-
-			List<PollsStructure> list = DAOProvider.getDao().getPolls();
-
-			fillItems(connection, SQLData.POLLSOPTIONS_BANDS, getID(list, "Voting for favourite band:"), pollsOptions);
-			fillItems(connection, SQLData.POLLSOPTIONS_CARS, getID(list, "Voting for best car manufacturer:"),
-					pollsOptions);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void fillItems(Connection connection, List<String> list, int id, String options) throws SQLException {
-		for (String string : list) {
-			PreparedStatement statement = connection.prepareStatement(options + string + ");");
-			statement.setInt(1, id);
-			statement.execute();
-			statement.close();
 		}
 
 	}
 
-	private int getID(List<PollsStructure> list, String string) {
-		for (PollsStructure struc : list) {
-			if (struc.getTitle().contains(string)) {
-				return struc.getId();
-			}
-		}
-
-		throw new IllegalArgumentException("Poll with title \'" + string + "\' doesn't exist!");
-	}
-
+	/**
+	 * Method is called when program wants to be closed<br>
+	 * Before closing,method deletes current {@link ComboPooledDataSource}
+	 * 
+	 * @param sce
+	 *            - servlet context event
+	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		ComboPooledDataSource cpds = (ComboPooledDataSource) sce.getServletContext()
