@@ -1,6 +1,7 @@
 package hr.fer.zemris.java;
 
 import java.beans.PropertyVetoException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,9 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletContextEvent;
@@ -21,7 +20,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 
 import hr.fer.zemris.java.dao.DAOProvider;
-import hr.fer.zemris.java.dao.sql.SQLDAO;
 import hr.fer.zemris.java.dao.sql.SQLData;
 import hr.fer.zemris.java.strcutures.PollsStructure;
 
@@ -47,8 +45,14 @@ public class Inicijalizacija implements ServletContextListener {
 		Properties properties = new Properties();
 		String connectionURL = null;
 		try {
-			properties.load(Files
-					.newInputStream(Paths.get(sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties"))));
+			properties.load(new FileInputStream(
+					Paths.get(sce.getServletContext().getRealPath("/WEB-INF/dbsettings.properties")).toFile()));
+
+			System.out.println(properties.getProperty("host"));
+			System.out.println(properties.getProperty("port"));
+			System.out.println(properties.getProperty("name"));
+			System.out.println(properties.getProperty("user"));
+			System.out.println(properties.getProperty("password"));
 
 			connectionURL = "jdbc:derby://" + properties.getProperty("host") + ":" + properties.getProperty("port")
 					+ "/" + properties.getProperty("name") + ";user=" + properties.getProperty("user") + ";password="
