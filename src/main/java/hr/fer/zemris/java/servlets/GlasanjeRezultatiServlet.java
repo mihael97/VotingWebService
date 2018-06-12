@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +20,6 @@ import hr.fer.zemris.java.strcutures.PollOptionsStructure;
  * @author Mihael
  *
  */
-@WebServlet("/servleti/glasanje-rezultati")
 public class GlasanjeRezultatiServlet extends HttpServlet {
 	/**
 	 * serialVersionUID

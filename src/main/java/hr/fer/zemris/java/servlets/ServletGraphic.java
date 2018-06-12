@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServlet;
@@ -19,11 +18,12 @@ import org.jfree.chart.util.Rotation;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 
+import hr.fer.zemris.java.dao.DAOProvider;
 import hr.fer.zemris.java.strcutures.PollOptionsStructure;
 
 /**
- * Class prepares renders image with informations stored in
- * {@link ServletContext} attribute with key <code>'allItems'</code>
+ * Class renders image with <code>poll options</code> values of current active
+ * poll
  * 
  * @author Mihael
  *
@@ -46,13 +46,13 @@ public class ServletGraphic extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		List<PollOptionsStructure> list = DAOProvider.getDao()
+				.loadItems((int) req.getServletContext().getAttribute("pollID"));
+
 		// specification setting
 		resp.setContentType("png; charset=utf-8");
-		System.out.println("\n\n\n\n\nTu sam!");
 
-		@SuppressWarnings("unchecked")
-		PieDataset dataset = createDataset(
-				(List<PollOptionsStructure>) req.getServletContext().getAttribute("allItems"));
+		PieDataset dataset = createDataset(list);
 		JFreeChart chart = createChart(dataset, "");
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -67,17 +67,18 @@ public class ServletGraphic extends HttpServlet {
 	/**
 	 * Method creates data set
 	 * 
-	 * @param options
-	 *            poll options
+	 * @param list
+	 *            - list of <code>poll items</code>
 	 * 
-	 * @return dataset
+	 * @return {@link PieDataset} - structure with informations prepared like image
+	 *         rendering source
 	 */
-	private PieDataset createDataset(List<PollOptionsStructure> options) {
+	private PieDataset createDataset(List<PollOptionsStructure> list) {
 		DefaultPieDataset result = new DefaultPieDataset();
 
-		if (options != null) {
-			for (PollOptionsStructure struc : options) {
-				result.setValue(struc.getOptionTitle(), struc.getVotes());
+		if (list != null) {
+			for (PollOptionsStructure struc : list) {
+				result.setValue(struc.getOptionTitle() + "(" + struc.getVotes() + ")", struc.getVotes());
 			}
 		} else {
 			result.setValue("Java", 99.5);

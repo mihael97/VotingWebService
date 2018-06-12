@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Class contains all data which will be stored in tables
  * 
- * @author ime
+ * @author Mihael
  *
  */
 public abstract class SQLData {

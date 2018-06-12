@@ -8,4 +8,77 @@
 
 	<display-name>MyFirstApp</display-name>
 	<description>MyFirstApp</description>
+
+	<servlet>
+		<servlet-name>voting</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.GlasanjeServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>votingVote</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.GlasanjeGlasajServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>votingRes</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.GlasanjeRezultatiServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>votingGraph</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.ServletGraphic</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>votingXLS</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.ServletXLS</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>index</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.ServletIndex</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>loading</servlet-name>
+		<servlet-class>hr.fer.zemris.java.servlets.ServletLoading</servlet-class>
+	</servlet>
+
+
+	<servlet-mapping>
+		<servlet-name>voting</servlet-name>
+		<url-pattern>/servleti/glasanje</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>votingVote</servlet-name>
+		<url-pattern>/servleti/glasanje-glasaj</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>votingRes</servlet-name>
+		<url-pattern>/servleti/glasanje-rezultati</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>votingGraph</servlet-name>
+		<url-pattern>/servleti/glasanje-grafika</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>votingXLS</servlet-name>
+		<url-pattern>/servleti/glasanje-xls</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>index</servlet-name>
+		<url-pattern>/index.html</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>loading</servlet-name>
+		<url-pattern>/servleti/index.html</url-pattern>
+	</servlet-mapping>
+
+
 </web-app>

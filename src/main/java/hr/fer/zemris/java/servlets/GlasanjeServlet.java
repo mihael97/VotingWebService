@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import hr.fer.zemris.java.dao.DAOProvider;
-import hr.fer.zemris.java.strcutures.PollOptionsStructure;
 import hr.fer.zemris.java.strcutures.PollsStructure;
 
 /**
@@ -19,7 +17,6 @@ import hr.fer.zemris.java.strcutures.PollsStructure;
  * @author MIhael
  *
  */
-@WebServlet("/servleti/glasanje")
 public class GlasanjeServlet extends HttpServlet {
 	/**
 	 * serialVersonUID
@@ -40,26 +37,11 @@ public class GlasanjeServlet extends HttpServlet {
 		resp.setContentType("text/html; charset=utf-8");
 
 		int id = Integer.parseInt(req.getParameter("pollID"));
-
-		StringBuilder html = new StringBuilder();
-		html.append("<html>\n<body>\n<h2>Please vote for one of given items by clicking on name</h2>\n");
-
 		PollsStructure poll = DAOProvider.getDao().getPolls().stream().filter(e -> e.getId() == id)
 				.collect(Collectors.toList()).get(0);
-		html.append("<h3>").append(poll.getTitle()).append("</h3>\n");
-		html.append("<h4>").append(poll.getMessage()).append("</h4>\n");
+		req.getSession().setAttribute("poll", poll);
 
-		html.append("<ol>\n");
-
-		for (PollOptionsStructure struc : DAOProvider.getDao().loadItems(id)) {
-			html.append("<li>").append("<a href=")
-					.append(req.getContextPath() + "/servleti/glasanje-glasaj?id=" + struc.getId() + ">");
-			html.append(struc.getOptionTitle());
-			html.append("</a></li>\n");
-		}
-
-		html.append("</ol>\n</body>\n</html>\n");
-
-		resp.getWriter().write(html.toString());
+		req.getSession().setAttribute("items", DAOProvider.getDao().loadItems(id));
+		req.getRequestDispatcher("/WEB-INF/pages/glasanjeIndex.jsp").forward(req, resp);
 	}
 }

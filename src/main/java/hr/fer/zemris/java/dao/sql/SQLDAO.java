@@ -42,7 +42,7 @@ public class SQLDAO implements DAO {
 				forReturn.add(new PollsStructure(set.getInt("id"), set.getString("title"), set.getString("message")));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DAOException(e);
 		}
 
 		return forReturn;
@@ -86,7 +86,7 @@ public class SQLDAO implements DAO {
 						set.getString("optionLink"), set.getInt("pollID"), set.getInt("votesCount")));
 			}
 		} catch (NumberFormatException | SQLException e) {
-			e.printStackTrace();
+			throw new DAOException(e);
 		}
 
 		return forReturn;
@@ -110,7 +110,7 @@ public class SQLDAO implements DAO {
 				return set.getInt("pollID");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DAOException(e);
 		}
 
 		throw new DAOException("Item with id=" + idVote + " doesn't exist!");

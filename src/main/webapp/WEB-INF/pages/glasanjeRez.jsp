@@ -3,22 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@  page session="true"%>
 
-
-<%
-	String color = "#FFFFFF"; //white
-	String stored = String.valueOf(session.getAttribute("pickedBgCol"));
-
-	if (stored != null) {
-		if (stored.equals("red")) {
-			color = "#FF0000";
-		} else if (stored.equals("cyan")) {
-			color = "#00FFFF";
-		} else if (stored.equals("green")) {
-			color = "#00FF00";
-		}
-	}
-%>
-
 <!DOCTYPE>
 
 <html>
@@ -29,7 +13,7 @@ table.rez td {
 }
 </style>
 </head>
-<body bgcolor=<%=color%>>
+<body>
 	<h1>Voting results</h1>
 	<p>This are voting results</p>
 	<table border="1" cellspacing="0" class="rez">

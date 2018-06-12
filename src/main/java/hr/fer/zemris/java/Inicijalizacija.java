@@ -22,7 +22,7 @@ import com.mchange.v2.c3p0.DataSources;
 import hr.fer.zemris.java.dao.sql.SQLData;
 
 /**
- * Class represents starting point to server and implements
+ * Class represents starting point of server and implements
  * {@link ServletContextListener}<br>
  * In <code>contextInitialized</code>,method reads file with properties from
  * project location <code>src/main/webapp/WEB-INF/</code>. If file doesn't
@@ -42,9 +42,9 @@ public class Inicijalizacija implements ServletContextListener {
 
 	/**
 	 * Method prepares connection functionality<br>
-	 * Firstly loads properties file from disc,method initializes
+	 * Firstly,method loads properties from disc and initializes
 	 * {@link ComboPooledDataSource} with loaded data. Secondly calls methods for
-	 * checking if tables exist
+	 * checking if tables exist and eventually fills table with data
 	 * 
 	 * @param sce
 	 *            - {@link ServletContextEvent} servlet event
@@ -158,7 +158,7 @@ public class Inicijalizacija implements ServletContextListener {
 	}
 
 	/**
-	 * Method fills created tables with data
+	 * Method fills created table with data
 	 * 
 	 * @param connection
 	 *            - connection
@@ -166,6 +166,8 @@ public class Inicijalizacija implements ServletContextListener {
 	 *            - data we want to insert
 	 * @throws SQLException
 	 *             - if exception during insertion appears
+	 * @throws IllegalArgumentException
+	 *             - if id(poll ID) is lower than 0
 	 */
 	private void fillTable(Connection connection, List<String> options) throws SQLException {
 		String polls = "INSERT INTO Polls(title,message) VALUES(";
