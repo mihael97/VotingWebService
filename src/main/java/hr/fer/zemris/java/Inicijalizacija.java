@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,32 +116,61 @@ public class Inicijalizacija implements ServletContextListener {
 	private void createTables(Connection connection) {
 
 		try {
-			PreparedStatement statement = connection
-					.prepareStatement("CREATE TABLE Polls (id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
-							+ " title VARCHAR(150) NOT NULL, message CLOB(2048) NOT NULL)");
-			statement.execute();
+			if (!checkIfExists(connection)) {
+				PreparedStatement statement = connection
+						.prepareStatement("CREATE TABLE Polls (id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
+								+ " title VARCHAR(150) NOT NULL, message CLOB(2048) NOT NULL)");
+				statement.execute();
 
-			try {
-				statement.close();
-			} catch (Exception e) {
+				try {
+					statement.close();
+				} catch (Exception e) {
+				}
+
+				statement = connection
+						.prepareStatement("CREATE TABLE PollOptions(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
+								+ "optionTitle VARCHAR(100) NOT NULL,optionLink VARCHAR(150) NOT NULL,pollID BIGINT,"
+								+ "votesCount BIGINT,FOREIGN KEY (pollID) REFERENCES Polls(id))");
+				statement.execute();
+				try {
+					statement.close();
+				} catch (Exception e) {
+				}
+
+				created = true;
 			}
-
-			statement = connection
-					.prepareStatement("CREATE TABLE PollOptions(id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,"
-							+ "optionTitle VARCHAR(100) NOT NULL,optionLink VARCHAR(150) NOT NULL,pollID BIGINT,"
-							+ "votesCount BIGINT,FOREIGN KEY (pollID) REFERENCES Polls(id))");
-			statement.execute();
-			try {
-				statement.close();
-			} catch (Exception e) {
-			}
-
-			created = true;
 		} catch (SQLException e) {
 			if (!e.getSQLState().equals("X0Y32")) {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * Method checks if table already exists in data base
+	 * 
+	 * @param connection
+	 *            - connection
+	 * @return <code>true</code> if table exists,otherwise <code>false</code>
+	 * @throws SQLException
+	 *             - if exception during checking appears
+	 */
+	private boolean checkIfExists(Connection connection) throws SQLException {
+		DatabaseMetaData metaData = connection.getMetaData();
+		ResultSet set = metaData.getTables(null, null, "Polls", null);
+
+		while (set.next()) { // we are only checking if table 'Polls' exists. We have another table in
+								// memory,but we create both of them in same time so it is small possibility
+								// that
+								// second would'n exists
+			if (set.getString("TABLE_NAME").toUpperCase().equals("POLLS")) {
+				set.close();
+				return true;
+			}
+		}
+
+		set.close();
+		return false;
 	}
 
 	/**
