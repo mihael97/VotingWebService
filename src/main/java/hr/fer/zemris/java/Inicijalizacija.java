@@ -163,7 +163,7 @@ public class Inicijalizacija implements ServletContextListener {
 		ResultSet set = null;
 		try {
 			metaData = connection.getMetaData();
-			set = metaData.getTables(null, null, "Polls", null);
+			set = metaData.getTables(null, null, "POLLS", null);
 
 			while (set.next()) { // we are only checking if table 'Polls' exists. We have another table in
 									// memory,but we create both of them in same time so it is small possibility
