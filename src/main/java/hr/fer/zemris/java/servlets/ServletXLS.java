@@ -42,7 +42,7 @@ public class ServletXLS extends HttpServlet {
 		resp.setStatus(HttpServletResponse.SC_OK);
 
 		HSSFWorkbook file = generateDocument(
-				DAOProvider.getDao().loadItems((int) req.getServletContext().getAttribute("pollID")));
+				DAOProvider.getDao().loadItems(Integer.parseInt(req.getParameter("pollID"))));
 
 		file.write(resp.getOutputStream());
 		resp.getOutputStream().flush();

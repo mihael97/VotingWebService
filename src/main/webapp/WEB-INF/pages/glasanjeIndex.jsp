@@ -1,3 +1,6 @@
+<%@page import="hr.fer.zemris.java.strcutures.PollOptionsStructure"%>
+<%@page import="java.util.List"%>
+<%@page import="hr.fer.zemris.java.dao.DAOProvider"%>
 <%@page import="hr.fer.zemris.java.strcutures.PollsStructure"%>
 <%@ page contentType="text/html; charset=UTF-8
 	" pageEncoding="UTF-8"%>
@@ -11,7 +14,9 @@
 
 	<h3>
 		<%
-			PollsStructure struc = (PollsStructure) request.getSession().getAttribute("poll");
+			int pollID = Integer.parseInt(request.getParameter("pollID"));
+			PollsStructure struc = (PollsStructure) DAOProvider.getDao().getPollByID(pollID);
+			List<PollOptionsStructure> list = DAOProvider.getDao().loadItems(pollID);
 			System.out.print(struc.getTitle());
 		%>
 	</h3>
@@ -23,9 +28,10 @@
 
 
 	<ol>
-		<c:forEach var="item" items="${items}">
+		<c:forEach var="item" items="<%=list%>">
 			<li><a
-				href="<%=request.getContextPath()%>\servleti\glasanje-glasaj?id=${item.getId()}">${item.getOptionTitle()}</a></li>
+				href="<%=request.getContextPath()%>\servleti\glasanje-glasaj?id=${item.getId()}&pollID=
+				<%=pollID %>">${item.getOptionTitle()}</a></li>
 		</c:forEach>
 	</ol>
 </body>

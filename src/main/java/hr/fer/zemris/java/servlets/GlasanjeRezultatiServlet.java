@@ -36,12 +36,11 @@ public class GlasanjeRezultatiServlet extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		List<PollOptionsStructure> bands = DAOProvider.getDao()
-				.loadItems((int) req.getServletContext().getAttribute("pollID"));
+		List<PollOptionsStructure> bands = DAOProvider.getDao().loadItems(Integer.parseInt(req.getParameter("pollID")));
 
 		getResults(bands, req);
 
-		req.getSession().setAttribute("allItems", bands);
+		req.setAttribute("allItems", bands);
 
 		req.getRequestDispatcher("/WEB-INF/pages/glasanjeRez.jsp").forward(req, resp);
 	}

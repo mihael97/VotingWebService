@@ -54,11 +54,11 @@ public class SQLDAO implements DAO {
 	 * @see hr.fer.zemris.java.dao.DAO#incrementVote(int)
 	 */
 	@Override
-	public void incrementVote(int id) {
+	public void incrementVote(int id, Integer pollID) {
 		Connection connection = SQLConnectionProvider.getConnection();
 		try {
-			PreparedStatement statement = connection
-					.prepareStatement("UPDATE PollOptions SET votesCount=votesCount+1 WHERE id=" + id);
+			PreparedStatement statement = connection.prepareStatement(
+					"UPDATE PollOptions SET votesCount=votesCount+1 WHERE id=" + id + "AND pollID=" + pollID);
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			throw new DAOException(e);
@@ -111,9 +111,32 @@ public class SQLDAO implements DAO {
 			}
 		} catch (SQLException e) {
 			throw new DAOException(e);
+		} finally {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				new DAOException(e);
+			}
 		}
 
 		throw new DAOException("Item with id=" + idVote + " doesn't exist!");
+	}
+
+	@Override
+	public PollsStructure getPollByID(int pollID) {
+		Connection connection = SQLConnectionProvider.getConnection();
+
+		try {
+			PreparedStatement statement = connection.prepareStatement("SELECT * FROM Polls WHERE id=" + pollID);
+			ResultSet set = statement.executeQuery();
+
+			while (set.next()) {
+				return new PollsStructure(set.getInt("id"), set.getString("title"), set.getString("message"));
+			}
+		} catch (SQLException e) {
+			throw new DAOException(e);
+		}
+		return null;
 	}
 
 }

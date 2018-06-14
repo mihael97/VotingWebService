@@ -46,8 +46,7 @@ public class ServletGraphic extends HttpServlet {
 	 */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		List<PollOptionsStructure> list = DAOProvider.getDao()
-				.loadItems((int) req.getServletContext().getAttribute("pollID"));
+		List<PollOptionsStructure> list = DAOProvider.getDao().loadItems(Integer.parseInt(req.getParameter("pollID")));
 
 		// specification setting
 		resp.setContentType("png; charset=utf-8");

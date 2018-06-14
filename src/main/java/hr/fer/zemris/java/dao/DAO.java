@@ -19,12 +19,22 @@ public interface DAO {
 	public List<PollsStructure> getPolls();
 
 	/**
+	 * Method returns poll with specific id
+	 * 
+	 * @param pollID
+	 *            - poll ID
+	 * @return {@link PollsStructure}
+	 */
+	public PollsStructure getPollByID(int pollID);
+
+	/**
 	 * Method increments vote to data with given id
 	 * 
 	 * @param id
 	 *            - data id
+	 * @param pollID
 	 */
-	public void incrementVote(int id);
+	public void incrementVote(int id, Integer pollID);
 
 	/**
 	 * Method loads all poll options from table
