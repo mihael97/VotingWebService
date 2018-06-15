@@ -37,7 +37,8 @@ public class GlasanjeServlet extends HttpServlet {
 		resp.setContentType("text/html; charset=utf-8");
 
 		int id = Integer.parseInt(req.getParameter("pollID"));
+		req.setAttribute("pollID", id);
 
-		req.getRequestDispatcher("/WEB-INF/pages/glasanjeIndex.jsp?pollID="+id).forward(req, resp);
+		req.getRequestDispatcher("/WEB-INF/pages/glasanjeIndex.jsp").forward(req, resp);
 	}
 }

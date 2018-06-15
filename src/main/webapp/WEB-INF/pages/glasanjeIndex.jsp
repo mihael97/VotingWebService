@@ -14,7 +14,7 @@
 
 	<h3>
 		<%
-			int pollID = Integer.parseInt(request.getParameter("pollID"));
+			int pollID = Integer.parseInt(String.valueOf(request.getAttribute("pollID")));
 			PollsStructure struc = (PollsStructure) DAOProvider.getDao().getPollByID(pollID);
 			List<PollOptionsStructure> list = DAOProvider.getDao().loadItems(pollID);
 			System.out.print(struc.getTitle());
