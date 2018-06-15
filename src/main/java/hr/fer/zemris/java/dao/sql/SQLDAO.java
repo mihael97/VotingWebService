@@ -122,6 +122,11 @@ public class SQLDAO implements DAO {
 		throw new DAOException("Item with id=" + idVote + " doesn't exist!");
 	}
 
+	/**
+	 * (non-Javadoc)
+	 * 
+	 * @see hr.fer.zemris.java.dao.DAO#getPollByID(int)
+	 */
 	@Override
 	public PollsStructure getPollByID(int pollID) {
 		Connection connection = SQLConnectionProvider.getConnection();

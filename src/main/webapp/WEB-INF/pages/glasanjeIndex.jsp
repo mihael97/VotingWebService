@@ -12,26 +12,18 @@
 <body>
 	<h2>Please vote for one of given items by clicking on name</h2>
 
-	<h3>
-		<%
-			int pollID = Integer.parseInt(String.valueOf(request.getAttribute("pollID")));
-			PollsStructure struc = (PollsStructure) DAOProvider.getDao().getPollByID(pollID);
-			List<PollOptionsStructure> list = DAOProvider.getDao().loadItems(pollID);
-			System.out.print(struc.getTitle());
-		%>
+	<h3><%=((PollsStructure) request.getAttribute("poll")).getTitle()%>
 	</h3>
-	<h4>
-		<%
-			System.out.print(struc.getMessage());
-		%>
+	<h4><%=((PollsStructure) request.getAttribute("poll")).getMessage()%>
+
 	</h4>
 
 
 	<ol>
-		<c:forEach var="item" items="<%=list%>">
+		<c:forEach var="item" items="${requestScope.allItems}">
 			<li><a
 				href="<%=request.getContextPath()%>\servleti\glasanje-glasaj?id=${item.getId()}&pollID=
-				<%=pollID %>">${item.getOptionTitle()}</a></li>
+				<%=request.getAttribute("pollID")%>">${item.getOptionTitle()}</a></li>
 		</c:forEach>
 	</ol>
 </body>

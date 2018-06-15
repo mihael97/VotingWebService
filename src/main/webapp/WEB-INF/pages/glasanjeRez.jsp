@@ -14,24 +14,6 @@
 <!DOCTYPE>
 <%
 	int pollID = Integer.parseInt(request.getParameter("pollID"));
-	List<PollOptionsStructure> list = DAOProvider.getDao().loadItems(pollID);
-	Collections.sort(list, new Comparator<PollOptionsStructure>() {
-
-		@Override
-		public int compare(PollOptionsStructure arg0, PollOptionsStructure arg1) {
-			return arg1.getVotes().compareTo(arg0.getVotes());
-		}
-	});
-
-	int max = list.get(0).getVotes();
-	List<PollOptionsStructure> best = new ArrayList<>();
-	for (PollOptionsStructure option : list) {
-		if (option.getVotes() == max) {
-			best.add(option);
-		} else {
-			break;
-		}
-	}
 %>
 <html>
 <head>
@@ -52,7 +34,7 @@ table.rez td {
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach var="structure" items="<%=list%>">
+			<c:forEach var="structure" items="${requestScope.allItems }">
 				<tr>
 					<td>${structure.getOptionTitle()}</td>
 					<td>${structure.getVotes()}</td>
@@ -72,7 +54,7 @@ table.rez td {
 	<h2>Other</h2>
 	<p>Some links from winner/winners</p>
 	<ul>
-		<c:forEach var="structure" items="<%=best%>">
+		<c:forEach var="structure" items="${requestScope.best }">
 			<li><a href="${structure.getOptionLink()}" target="_blank">${structure.getOptionTitle()}</a></li>
 		</c:forEach>
 	</ul>

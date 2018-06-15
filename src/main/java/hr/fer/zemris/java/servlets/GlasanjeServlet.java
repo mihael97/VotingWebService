@@ -1,15 +1,12 @@
 package hr.fer.zemris.java.servlets;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import hr.fer.zemris.java.dao.DAOProvider;
-import hr.fer.zemris.java.strcutures.PollsStructure;
 
 /**
  * Class represents data loader and creator of voting form
@@ -38,6 +35,8 @@ public class GlasanjeServlet extends HttpServlet {
 
 		int id = Integer.parseInt(req.getParameter("pollID"));
 		req.setAttribute("pollID", id);
+		req.setAttribute("poll", DAOProvider.getDao().getPollByID(id));
+		req.setAttribute("allItems", DAOProvider.getDao().loadItems(id));
 
 		req.getRequestDispatcher("/WEB-INF/pages/glasanjeIndex.jsp").forward(req, resp);
 	}
