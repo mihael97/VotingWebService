@@ -35,10 +35,10 @@ public class GlasanjeGlasajServlet extends HttpServlet {
 		resp.setStatus(HttpServletResponse.SC_OK);
 
 		Integer idVote = Integer.parseInt(req.getParameter("id"));
-		Integer pollID= Integer.parseInt(req.getParameter("pollID"));
-		DAOProvider.getDao().incrementVote(idVote,pollID);
+		Integer pollID = Integer.parseInt(req.getParameter("pollID"));
+		DAOProvider.getDao().incrementVote(idVote, pollID);
 
-		resp.sendRedirect(req.getContextPath() + "/servleti/glasanje-rezultati?pollID="
-				+pollID);
+		// resp.sendRedirect(req.getContextPath() + "/servleti/glasanje-rezultati");
+		req.getRequestDispatcher("glasanje-rezultati").forward(req, resp);
 	}
 }
